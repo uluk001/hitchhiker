@@ -10,6 +10,7 @@ class Config:
     default_language: str = 'ru'
     cities: List[str] = field(default_factory=list)
     followup_delay: int = 120  # seconds
+    db_url: str = 'postgresql+asyncpg://user:password@localhost/hitchhiker'
 
     @classmethod
     def load(cls, path: str | Path) -> 'Config':

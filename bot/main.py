@@ -3,7 +3,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.bot import DefaultBotProperties
 from aiogram.fsm.storage.memory import MemoryStorage as FSMStorage
 from .config import Config
-from .storage import MemoryStorage
+from .storage import SQLStorage
 from .handlers import language, driver, passenger, followup, my_trips
 
 
@@ -13,7 +13,7 @@ async def main() -> None:
               default=DefaultBotProperties(parse_mode='HTML'))
     dp = Dispatcher(storage=FSMStorage())
 
-    storage = MemoryStorage()
+    storage = await SQLStorage.create(config.db_url)
     dp['config'] = config
     dp['storage'] = storage
 

@@ -10,7 +10,7 @@ A Telegram bot for connecting drivers and passengers for city-to-city ride shari
 pip install -r requirements.txt
 ```
 
-2. Fill `config.json` with your bot token and cities.
+2. Fill `config.json` with your bot token, database connection string and cities.
 
 3. Run the bot:
 
