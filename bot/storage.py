@@ -1,29 +1,27 @@
 from __future__ import annotations
+
 from dataclasses import dataclass, field
-from datetime import date, datetime, time as dt_time
+from datetime import date, datetime
+from datetime import time as dt_time
+from threading import Lock
 from typing import Dict, List, Optional
 from uuid import UUID, uuid4
-from threading import Lock
+
 from sqlalchemy import (
+    JSON,
     Date,
     DateTime,
+    ForeignKey,
     Integer,
     String,
     Time,
-    JSON,
-    ForeignKey,
-    select,
     delete,
+    select,
     update,
 )
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
-
 
 FileID = str
 
@@ -34,7 +32,7 @@ class Trip:
     driver_id: int
     from_city: str
     to_city: str
-    date: date
+    departure_date: date
     time: Optional[dt_time]
     seats: int
     price: Optional[str]
@@ -49,7 +47,7 @@ class Storage:
     async def create_trip(self, trip: Trip) -> None:
         raise NotImplementedError
 
-    async def search_trips(self, from_city: str, to_city: str, date: date) -> List[Trip]:
+    async def search_trips(self, from_city: str, to_city: str, departure_date: date) -> List[Trip]:
         raise NotImplementedError
 
     async def get_trip(self, trip_id: UUID) -> Optional[Trip]:
@@ -78,11 +76,11 @@ class MemoryStorage(Storage):
         with self._lock:
             self._trips[trip.id] = trip
 
-    async def search_trips(self, from_city: str, to_city: str, date: date) -> List[Trip]:
+    async def search_trips(self, from_city: str, to_city: str, departure_date: date) -> List[Trip]:
         with self._lock:
             return [
                 t for t in self._trips.values()
-                if t.from_city == from_city and t.to_city == to_city and t.date == date
+                if t.from_city == from_city and t.to_city == to_city and t.departure_date == departure_date
             ]
 
     async def get_trip(self, trip_id: UUID) -> Optional[Trip]:
@@ -122,7 +120,7 @@ class TripModel(Base):
     driver_id: Mapped[int] = mapped_column(Integer, nullable=False)
     from_city: Mapped[str] = mapped_column(String, nullable=False)
     to_city: Mapped[str] = mapped_column(String, nullable=False)
-    date: Mapped[date] = mapped_column(Date, nullable=False)
+    departure_date: Mapped[date] = mapped_column(Date, nullable=False)
     time: Mapped[Optional[dt_time]] = mapped_column(Time)
     seats: Mapped[int] = mapped_column(Integer, nullable=False)
     price: Mapped[Optional[str]] = mapped_column(String)
@@ -139,7 +137,7 @@ class TripModel(Base):
             driver_id=trip.driver_id,
             from_city=trip.from_city,
             to_city=trip.to_city,
-            date=trip.date,
+            departure_date=trip.departure_date,
             time=trip.time,
             seats=trip.seats,
             price=trip.price,
@@ -156,7 +154,7 @@ class TripModel(Base):
             driver_id=self.driver_id,
             from_city=self.from_city,
             to_city=self.to_city,
-            date=self.date,
+            departure_date=self.departure_date,
             time=self.time,
             seats=self.seats,
             price=self.price,
@@ -193,13 +191,13 @@ class SQLStorage(Storage):
             session.add(TripModel.from_dataclass(trip))
             await session.commit()
 
-    async def search_trips(self, from_city: str, to_city: str, date_: date) -> List[Trip]:
+    async def search_trips(self, from_city: str, to_city: str, departure_date: date) -> List[Trip]:
         async with self._session_maker() as session:
             result = await session.execute(
                 select(TripModel).where(
                     TripModel.from_city == from_city,
                     TripModel.to_city == to_city,
-                    TripModel.date == date_,
+                    TripModel.departure_date == departure_date,
                 )
             )
             return [row[0].to_dataclass() for row in result.all()]

@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import uuid
-from aiogram import Router, F
-from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import Message
-from ..storage import Trip, Storage
-from ..utils import validate_phone
 from datetime import date
+
+from aiogram import F, Router
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.types import Message
+
+from ..storage import Storage, Trip
+from ..utils import validate_phone
 
 router = Router()
 
@@ -14,7 +16,7 @@ router = Router()
 class CreateTrip(StatesGroup):
     from_city = State()
     to_city = State()
-    date = State()
+    departure_date = State()
     phone = State()
     confirm = State()
 
@@ -35,13 +37,13 @@ async def set_from_city(message: Message, state):
 @router.message(CreateTrip.to_city)
 async def set_to_city(message: Message, state):
     await state.update_data(to_city=message.text)
-    await state.set_state(CreateTrip.date)
+    await state.set_state(CreateTrip.departure_date)
     await message.answer('Дата в формате YYYY-MM-DD')
 
 
-@router.message(CreateTrip.date)
-async def set_date(message: Message, state):
-    await state.update_data(date=message.text)
+@router.message(CreateTrip.departure_date)
+async def set_departure_date(message: Message, state):
+    await state.update_data(departure_date=message.text)
     await state.set_state(CreateTrip.phone)
     await message.answer('Номер телефона')
 
@@ -57,7 +59,7 @@ async def set_phone(message: Message, state, storage: Storage):
         driver_id=message.from_user.id,
         from_city=data['from_city'],
         to_city=data['to_city'],
-        date=date.fromisoformat(data['date']),
+        departure_date=date.fromisoformat(data['departure_date']),
         time=None,
         seats=1,
         price=None,
