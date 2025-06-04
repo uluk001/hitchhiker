@@ -3,8 +3,8 @@ from __future__ import annotations
 import uuid
 from aiogram import Router, F
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import Message, CallbackQuery
-from ..storage import Trip, MemoryStorage
+from aiogram.types import Message
+from ..storage import Trip
 from ..utils import validate_phone
 from datetime import date
 
@@ -66,7 +66,7 @@ async def set_phone(message: Message, state):
         photos=[],
         comment=None,
     )
-    storage: MemoryStorage = message.bot['storage']
-    storage.create_trip(trip)
+    storage = message.bot['storage']
+    await storage.create_trip(trip)
     await message.answer('Поездка создана')
     await state.clear()

@@ -1,7 +1,7 @@
 from aiogram import Router, F
 from aiogram.types import Message
 from datetime import date
-from ..storage import MemoryStorage
+from ..storage import Storage
 
 router = Router()
 
@@ -14,8 +14,8 @@ async def cmd_search(message: Message):
 @router.message()
 async def handle_city(message: Message):
     # simplified search handler
-    storage: MemoryStorage = message.bot['storage']
-    trips = storage.search_trips(message.text, message.text, date.today())
+    storage: Storage = message.bot['storage']
+    trips = await storage.search_trips(message.text, message.text, date.today())
     if not trips:
         await message.answer('Не найдено')
         return

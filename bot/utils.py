@@ -1,6 +1,8 @@
+import asyncio
 import re
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from typing import Iterable
+
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 PHONE_REGEX = re.compile(r'^\+?\d{9,15}$')
@@ -20,7 +22,6 @@ def build_keyboard(buttons: Iterable[tuple[str, str]]) -> InlineKeyboardMarkup:
         inline_keyboard=[[InlineKeyboardButton(text=text, callback_data=data)] for text, data in buttons]
     )
 
-import asyncio
 
 async def schedule_followup(bot, chat_id: int, text: str, delay: int, keyboard: InlineKeyboardMarkup | None = None):
     await asyncio.sleep(delay)
