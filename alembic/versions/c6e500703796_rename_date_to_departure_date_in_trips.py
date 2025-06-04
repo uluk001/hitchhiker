@@ -1,7 +1,7 @@
 """rename_date_to_departure_date_in_trips
 
 Revision ID: c6e500703796
-Revises: 
+Revises:
 Create Date: 2025-06-04 15:34:52.936642
 
 """

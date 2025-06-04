@@ -1,17 +1,16 @@
+# flake8: noqa
 import asyncio
 import sys
 from logging.config import fileConfig
 from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from sqlalchemy import engine_from_config
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.pool import NullPool
 
 from alembic import context
-
-# Add project root to sys.path for bot.storage import
-# This needs to be before importing from 'bot'
-sys.path.append(str(Path(__file__).resolve().parents[1]))
 from bot.storage import Base
 
 config = context.config
