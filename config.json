@@ -1,0 +1,6 @@
+{
+  "token": "YOUR_TELEGRAM_BOT_TOKEN",
+  "default_language": "ru",
+  "cities": ["Bishkek", "Osh", "Jalal-Abad"],
+  "followup_delay": 120
+}
