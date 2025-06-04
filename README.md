@@ -7,7 +7,7 @@ A Telegram bot for connecting drivers and passengers for city-to-city ride shari
 1. Install dependencies:
 
 ```bash
-pip install aiogram
+pip install -r requirements.txt
 ```
 
 2. Fill `config.json` with your bot token and cities.
