@@ -65,11 +65,18 @@ class Storage:
     async def record_contact(self, trip_id: UUID, passenger_id: int) -> None:
         raise NotImplementedError
 
+    async def set_language(self, user_id: int, language: str) -> None:
+        raise NotImplementedError
+
+    async def get_language(self, user_id: int, default: str = 'ru') -> str:
+        raise NotImplementedError
+
 
 class MemoryStorage(Storage):
     def __init__(self) -> None:
         self._trips: Dict[UUID, Trip] = {}
         self._contacts: Dict[UUID, List[int]] = {}
+        self._languages: Dict[int, str] = {}
         self._lock = Lock()
 
     async def create_trip(self, trip: Trip) -> None:
@@ -107,6 +114,14 @@ class MemoryStorage(Storage):
     async def record_contact(self, trip_id: UUID, passenger_id: int) -> None:
         with self._lock:
             self._contacts.setdefault(trip_id, []).append(passenger_id)
+
+    async def set_language(self, user_id: int, language: str) -> None:
+        with self._lock:
+            self._languages[user_id] = language
+
+    async def get_language(self, user_id: int, default: str = 'ru') -> str:
+        with self._lock:
+            return self._languages.get(user_id, default)
 
 
 class Base(DeclarativeBase):
@@ -174,6 +189,13 @@ class ContactModel(Base):
     passenger_id: Mapped[int] = mapped_column(Integer, nullable=False)
 
 
+class UserModel(Base):
+    __tablename__ = 'users'
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    language: Mapped[str] = mapped_column(String, nullable=False)
+
+
 class SQLStorage(Storage):
     def __init__(self, session_maker: async_sessionmaker[AsyncSession]):
         self._session_maker = session_maker
@@ -226,3 +248,17 @@ class SQLStorage(Storage):
         async with self._session_maker() as session:
             session.add(ContactModel(trip_id=trip_id, passenger_id=passenger_id))
             await session.commit()
+
+    async def set_language(self, user_id: int, language: str) -> None:
+        async with self._session_maker() as session:
+            obj = await session.get(UserModel, user_id)
+            if obj:
+                obj.language = language
+            else:
+                session.add(UserModel(id=user_id, language=language))
+            await session.commit()
+
+    async def get_language(self, user_id: int, default: str = 'ru') -> str:
+        async with self._session_maker() as session:
+            obj = await session.get(UserModel, user_id)
+            return obj.language if obj else default
