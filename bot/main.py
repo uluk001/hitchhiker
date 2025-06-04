@@ -1,7 +1,7 @@
 import asyncio
 from aiogram import Bot, Dispatcher
+from aiogram.client.bot import DefaultBotProperties
 from aiogram.fsm.storage.memory import MemoryStorage as FSMStorage
-from aiogram.types import Message
 from .config import Config
 from .storage import MemoryStorage
 from .handlers import language, driver, passenger, followup, my_trips
@@ -9,7 +9,8 @@ from .handlers import language, driver, passenger, followup, my_trips
 
 async def main() -> None:
     config = Config.load('config.json')
-    bot = Bot(token=config.token, parse_mode='HTML')
+    bot = Bot(token=config.token,
+              default=DefaultBotProperties(parse_mode='HTML'))
     dp = Dispatcher(storage=FSMStorage())
 
     storage = MemoryStorage()
