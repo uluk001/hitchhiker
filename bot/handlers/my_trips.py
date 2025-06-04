@@ -6,8 +6,7 @@ router = Router()
 
 
 @router.message(F.text == '/my_trips')
-async def list_trips(message: Message):
-    storage: Storage = message.bot['storage']
+async def list_trips(message: Message, storage: Storage):
     trips = await storage.list_driver_trips(message.from_user.id)
     if not trips:
         await message.answer('У вас нет активных поездок')

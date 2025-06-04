@@ -4,7 +4,7 @@ import uuid
 from aiogram import Router, F
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message
-from ..storage import Trip
+from ..storage import Trip, Storage
 from ..utils import validate_phone
 from datetime import date
 
@@ -47,7 +47,7 @@ async def set_date(message: Message, state):
 
 
 @router.message(CreateTrip.phone)
-async def set_phone(message: Message, state):
+async def set_phone(message: Message, state, storage: Storage):
     if not validate_phone(message.text):
         await message.answer('Неверный формат телефона')
         return
@@ -66,7 +66,6 @@ async def set_phone(message: Message, state):
         photos=[],
         comment=None,
     )
-    storage = message.bot['storage']
     await storage.create_trip(trip)
     await message.answer('Поездка создана')
     await state.clear()

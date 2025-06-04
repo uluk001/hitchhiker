@@ -12,9 +12,8 @@ async def cmd_search(message: Message):
 
 
 @router.message()
-async def handle_city(message: Message):
+async def handle_city(message: Message, storage: Storage):
     # simplified search handler
-    storage: Storage = message.bot['storage']
     trips = await storage.search_trips(message.text, message.text, date.today())
     if not trips:
         await message.answer('Не найдено')
